@@ -1,0 +1,152 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>本格诡计构筑所</title>
+<meta name="description" content="排列组合史上的本格推理诡计，再加入新本格与非本格风味，生成一份完整的案件卷宗。A honkaku mystery trick generator.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@400;600;900&family=Special+Elite&family=Ma+Shan+Zheng&family=EB+Garamond:ital,wght@0,400;0,600;0,800;1,400&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/style.css">
+<link rel="stylesheet" href="css/dossier.css">
+</head>
+<body>
+<div class="lamp" aria-hidden="true"></div>
+
+<header class="masthead">
+  <div class="masthead-left">
+    <div class="eyebrow">HONKAKU TRICK ATELIER · EST. 1841</div>
+    <h1 data-i18n="h1">本格诡计构筑所</h1>
+    <p class="tagline" data-i18n="tagline">所有的不可能，都只是尚未被说明的可能。</p>
+  </div>
+  <div class="masthead-right">
+    <div class="lang-switch" role="group" aria-label="Language / 语言">
+      <button data-lang="zh" aria-pressed="true">中文</button>
+      <button data-lang="en" aria-pressed="false">EN</button>
+    </div>
+    <div class="case-stamp" id="caseStamp">
+      <span class="case-stamp-label" data-i18n="caseNo">案件编号</span>
+      <span class="case-stamp-no" id="caseNo">——</span>
+    </div>
+  </div>
+</header>
+
+<main class="desk">
+  <!-- ============ 构筑台 ============ -->
+  <aside class="bench" id="bench">
+    <section class="drawer">
+      <h2 class="drawer-title"><span data-i18n-num="0">壹</span><b data-i18n="d1">案件编号</b></h2>
+      <div class="seed-row">
+        <input id="seedInput" class="seed-input" spellcheck="false" data-i18n-aria="seedAria" aria-label="案件编号（随机种子）">
+        <button class="btn-ghost" id="newSeedBtn" data-i18n="newSeed" data-i18n-title="newSeedTitle">换号</button>
+      </div>
+      <p class="hint" data-i18n="seedHint">同一编号 + 同一配置 = 同一案件。可复制链接分享。</p>
+    </section>
+
+    <section class="drawer">
+      <h2 class="drawer-title"><span data-i18n-num="1">贰</span><b data-i18n="d2">构筑要素</b> <small data-i18n="d2s">🔒 锁定后重掷不变</small></h2>
+      <div id="slots" class="slots"></div>
+    </section>
+
+    <section class="drawer">
+      <h2 class="drawer-title"><span data-i18n-num="2">叁</span><b data-i18n="d3">诡计抽屉</b> <small data-i18n="d3s">参与随机的类别</small></h2>
+      <div id="catChips" class="chips"></div>
+    </section>
+
+    <section class="drawer">
+      <h2 class="drawer-title"><span data-i18n-num="3">肆</span><b data-i18n="d4">风味药柜</b> <small data-i18n="d4s">新本格 / 非本格</small></h2>
+      <div class="flavor-tools">
+        <label class="mini"><span data-i18n="flavorRandom">随机追加</span>
+          <select id="flavorRandom">
+            <option value="0">0</option>
+            <option value="1" selected>1</option>
+            <option value="2">2</option>
+            <option value="3">3</option>
+          </select>
+        </label>
+        <button class="btn-ghost small" id="clearFlavors" data-i18n="clear">清空</button>
+      </div>
+      <div id="flavorCabinet" class="cabinet"></div>
+    </section>
+
+    <section class="drawer">
+      <h2 class="drawer-title"><span data-i18n-num="4">伍</span><b data-i18n="d5">结构与戒律</b></h2>
+      <label class="toggle"><input type="checkbox" id="optChallenge" checked><span data-i18n="optChallenge">插入「致读者的挑战书」</span></label>
+      <label class="toggle"><input type="checkbox" id="optStrict"><span data-i18n="optStrict">严守戒律（排除违反诺克斯十诫的要素）</span></label>
+      <label class="toggle"><input type="checkbox" id="optSerial"><span data-i18n="optSerial">连续杀人（追加第二起事件）</span></label>
+    </section>
+
+    <div class="bench-actions">
+      <button class="seal-btn" id="buildBtn"><span data-i18n-html="build">构筑<br>事件</span></button>
+      <div class="bench-actions-side">
+        <button class="btn-ghost" id="unlockAllBtn" data-i18n="unlockAll">全部解锁</button>
+        <button class="btn-ghost" id="resetBtn" data-i18n="reset">恢复默认</button>
+        <p class="hint" data-i18n="actionHint">火漆印 = 换一个新编号。修改任何要素都会按当前编号即时重排。</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- ============ 卷宗 ============ -->
+  <section class="dossier-wrap">
+    <nav class="folder-tabs" role="tablist">
+      <button class="folder-tab active" data-tab="case" role="tab" data-i18n="tabCase">案件卷宗</button>
+      <button class="folder-tab" data-tab="atlas" role="tab" data-i18n="tabAtlas">诡计图鉴</button>
+      <button class="folder-tab" data-tab="rules" role="tab" data-i18n="tabRules">推理戒律</button>
+    </nav>
+
+    <div class="dossier">
+      <div class="tab-panel active" id="panel-case">
+        <div class="paper-actions">
+          <button class="btn-ink" id="copyMdBtn" data-i18n="copyText">复制为文本</button>
+          <button class="btn-ink" id="copyLinkBtn" data-i18n="copyLink">复制分享链接</button>
+          <button class="btn-ink" id="printBtn" data-i18n="print">打印卷宗</button>
+        </div>
+        <article id="caseFile" class="case-file"></article>
+      </div>
+
+      <div class="tab-panel" id="panel-atlas">
+        <div class="atlas-head">
+          <h2 data-i18n="atlasTitle">诡计图鉴</h2>
+          <p data-i18n="atlasIntro">江户川乱步曾整理过八百余种诡计，卡尔在《三口棺材》里讲过一堂密室课。这里是可供构筑的零件。</p>
+          <input id="atlasSearch" class="atlas-search" data-i18n-ph="atlasSearch" placeholder="检索诡计、风味、作品名……">
+        </div>
+        <div id="atlas"></div>
+      </div>
+
+      <div class="tab-panel" id="panel-rules">
+        <div class="atlas-head">
+          <h2 data-i18n="rulesTitle">推理戒律</h2>
+          <p data-i18n="rulesIntro">1928–1929 年，诺克斯与范·达因先后为“公平的解谜游戏”立下规矩。新本格的乐趣之一，就是在知情的前提下打破它们。</p>
+        </div>
+        <div id="rulesBook"></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer class="colophon" data-i18n="footer">
+  诡计本身不是罪 · 本工具只生成虚构故事的骨架 · 作品名附带剧透遮挡，悬停或点击才显示
+</footer>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script src="js/data/rules.js"></script>
+<script src="js/data/world.js"></script>
+<script src="js/data/tricks-impossible.js"></script>
+<script src="js/data/tricks-identity.js"></script>
+<script src="js/data/tricks-misc.js"></script>
+<script src="js/data/flavors.js"></script>
+<script src="js/i18n/strings-zh.js"></script>
+<script src="js/i18n/strings-en.js"></script>
+<script src="js/i18n/en-world.js"></script>
+<script src="js/i18n/en-tricks-a.js"></script>
+<script src="js/i18n/en-tricks-b.js"></script>
+<script src="js/i18n/en-tricks-c.js"></script>
+<script src="js/i18n/en-flavors.js"></script>
+<script src="js/i18n/lib.js"></script>
+<script src="js/generator.js"></script>
+<script src="js/render.js"></script>
+<script src="js/app.js"></script>
+</body>
+</html>
